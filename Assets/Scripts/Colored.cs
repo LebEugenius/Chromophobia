@@ -12,6 +12,7 @@ public class Colored : MonoBehaviour
 
     private bool _reverseDirection;
     private float _speed;
+
     public void StartMoving(Vector3 targetPosition, float speed)
     {
         _originalPosition = transform.position;
@@ -23,7 +24,13 @@ public class Colored : MonoBehaviour
     {
         return _targetPosition != Vector3.zero;
     }
+
     void Update()
+    {
+        MoveBetweenTwoPoints();
+    }
+
+    void MoveBetweenTwoPoints()
     {
         if(_targetPosition == Vector3.zero) return;
 
@@ -31,21 +38,24 @@ public class Colored : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, target, _speed * Time.deltaTime);
 
-        if ((target - transform.position).sqrMagnitude <= 0.1)
+        if ((target - transform.position).sqrMagnitude <= 0.1f)
             _reverseDirection = !_reverseDirection;
     }
+
     void OnMouseDown()
     {
-        var isCorrectClick = sprite.color == GameManager.Instance.currentColor;
-        if (!isCorrectClick)
+        if (GameManager.Instance.IsAgroColored(sprite.color))
         {
-            GameManager.Instance.PanicLevel += panicModifier;
-            GameManager.Instance.ActivateBlindness();
+            GameManager.Instance.OnCorrectColoredClick();
+        }
+        else
+        {
+            GameManager.Instance.IncreasePanic(panicModifier);
+            GameManager.Instance.OnWrongColoredClick();
         }
 
         _targetPosition = Vector3.zero;
         gameObject.SetActive(false);
         GameManager.Instance.CheckForComplete();
-        GameManager.Instance.PlayClickSound(isCorrectClick);
     }
 }

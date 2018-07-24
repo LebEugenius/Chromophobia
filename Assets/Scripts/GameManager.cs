@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+
 using Random = UnityEngine.Random;
 
 public enum State { Intro, Game, Ending }
@@ -11,59 +11,37 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    public GameSettings Settings;
+    public SpawnOffset Offset;
+
+    [Header("Managers")]
+    public AudioManager Audio;
+    public UIManager UI;
+
     [Header("References")]
-    public GameObject ColorGoPrefab;
+    public GameObject ColoredPrefab;
     public Color[] colors;
-    public GameObject Intro;
-    public GameObject DeathScreen;
-    public TMPro.TMP_Text DeathText;
-    public GameObject InGameUI;
-    public TMPro.TMP_Text helpText;
-
-    [Header("Common")]
-    public int startGOCount;
-    public int minimumAggresiveColors;
-    public float minScale;
-    public float maxScale;
-    [Tooltip("X - Left, Y - Right, Z - Top, W - Bottom ")]
-    public Vector4 spawnOffset;
-
-    public int tutorialLength = 5;
-
-
-    private State _state = State.Intro;
-    [System.NonSerialized] public int currentLevel;
-    [System.NonSerialized] public Color currentColor;
-    private List<Colored> ColorGOs = new List<Colored>();
-
-    [Header("Moving")]
-    public int startMovingLevel;
-    public int minimumMovingGOs;
-    public float minSpeed;
-    public float maxSpeed;
-
-    [Header("Panic")]
-    public Image Face;
-    public Sprite[] emotions;
-    public int[] panicLevels;
-    public float MaxPanic;
-    [System.NonSerialized] public float PanicLevel;
-
-    [Header("Blindness")]
-    public SpriteRenderer blindColor;
-    public float reduceBlindSpeed;
 
     [Header("Ending")] 
     public float restartClickDelay = 1f;
 
-    [Header("Audio")] 
-    public AudioSource SFXPlayer;
-    public AudioClip correctClickClip;
-    public float correctClickVolume = 0.1f;
-    public AudioClip wrongClickClip;
-    public float wrongClickVolume = 2f;
+    
+
+    private State _state = State.Intro;   
+
+    private Color _currentColor;
+    private int _currentLevel;
 
     private float _endTime;
+
+    private int _coloredsCount;
+    private int _agroColoredsCount;
+    private int _movingColoredsCount;
+
+    private float _panicCapacity;
+    private float _panic;
+
+    private List<Colored> _coloreds = new List<Colored>();
 
     void Awake()
     {
@@ -72,7 +50,6 @@ public class GameManager : MonoBehaviour
         else
             Destroy(gameObject);
     }
-
     void Update()
     {
         switch (_state)
@@ -95,30 +72,24 @@ public class GameManager : MonoBehaviour
     {
         if (Input.anyKeyDown)
         {
-            Intro.SetActive(false);
-            Face.gameObject.SetActive(true);
-            for (var i = 0; i < startGOCount; i++)
-                AddNewGO();
-
-            currentLevel = 0;
+            Initialize();
+            
             StartNewRound();
+
+            UI.OnGameStarted();
             _state = State.Game;
-            InGameUI.SetActive(true);
         }
     }
     void GameUpdate()
     {
-        if(PanicLevel < MaxPanic && currentLevel > tutorialLength)
-            PanicLevel += Time.deltaTime;
-        else if(PanicLevel >= MaxPanic)
+       if ( _currentLevel <= Settings.TutorialLength ) return;
+        
+        if (_panic < _panicCapacity )
+           IncreasePanic(Time.deltaTime);
+        else
             FinishGame();
 
-        for (var i = emotions.Length - 1; i >= 0; i--)
-        {
-            if (PanicLevel / MaxPanic < panicLevels[i] / 100f) continue;
-            Face.sprite = emotions[i];
-            break;
-        }
+        UI.SetEmotion(_panic / _panicCapacity);
     }
     void FinishUpdate()
     {
@@ -128,100 +99,99 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void StartNewRound()
+    void Initialize()
     {
-        PanicLevel = 0;
-        //Choose new color
-        currentColor = GetRandomColor();
-        Face.color = currentColor;
-        
-        currentLevel++;
+        _currentLevel = 0;
 
-        SetDifficulty();
+        _coloredsCount = Settings.StartColoredsCount;
+        _agroColoredsCount = Settings.StartAgroColoredsCount;
+        _movingColoredsCount = Settings.StartMovingColoredsCount;
 
-        ActivateBlindness();
+        _panicCapacity = Settings.StartPanicCapacity;
+
+        for (var i = 0; i < Settings.StartColoredsCount; i++)
+            AddNewGO();
+    }
+
+    void StartNewRound()
+    {
+        _panic = 0;
+        _currentLevel++;
+        _currentColor = GetRandomColor();
+
+        UI.ColorFace(_currentColor);
+        UI.ActivateFlash(_currentColor);
+        UI.SetTutorial(_currentLevel < Settings.TutorialLength, _currentColor);
+
+        IncreaseDifficulty();
 
         SetColoreds();
         SetMovingColoreds();
     }
 
-    public void SetColoreds()
+    void IncreaseDifficulty()
     {
-        for (var i = 0; i < ColorGOs.Count; i++)
-        {
-            var isBadOne = minimumAggresiveColors > i;
-            var randomSize = Random.Range(minScale, maxScale);
+        _coloredsCount = Mathf.Max(_coloredsCount, 1);
+        _agroColoredsCount =  Mathf.Max(_agroColoredsCount, 1);
 
-            //Randomize position in screen bounds
-            ColorGOs[i].transform.position = GetRandomPos(isBadOne);
-            ColorGOs[i].transform.localScale = Vector3.one * randomSize;
+        if (_currentLevel % Settings.PanicCapacityBonusRate == 0)
+            _panicCapacity += Settings.PanicCapacityBonus;
 
-            //Reset Moving
-            ColorGOs[i].StartMoving(Vector3.zero, 0);
-
-            //Color objects
-            ColorGOs[i].sprite.color = isBadOne ? currentColor : GetRandomColor();
-            ColorGOs[i].sprite.sortingOrder = isBadOne ? 1 : 0;
-
-            //Activate ready go
-            ColorGOs[i].gameObject.SetActive(true);
-        }
-    }
-    public void SetDifficulty()
-    {
-        startGOCount = Mathf.Max(startGOCount, 1);
-
-        minimumAggresiveColors =  Mathf.Max(minimumAggresiveColors, 1);;
-
-        if (currentLevel % 2 == 0)
+        if (_currentLevel % Settings.NewColoredsRate == 0)
             AddNewGO();
 
-        if (currentLevel % 5 == 0)
-            minimumAggresiveColors++;
+        if (_currentLevel % Settings.AgroColoredsRate == 0)
+            _agroColoredsCount++;
         
-        if(currentLevel < startMovingLevel) return;
+        if(_currentLevel < Settings.MovingColoredLevel) return;
 
-        if (currentLevel % 5 == 0 && currentLevel != startMovingLevel)
-            minimumMovingGOs++;
+        if (_currentLevel % 5 == 0 && _currentLevel != Settings.MovingColoredLevel)
+            _movingColoredsCount++;
 
-        minimumMovingGOs = Mathf.Min(minimumMovingGOs, ColorGOs.Count);
+        _movingColoredsCount = Mathf.Min(_movingColoredsCount, _coloreds.Count);
     }
-    public void SetMovingColoreds()
+
+    void SetColoreds()
     {
-        if(currentLevel < startMovingLevel) return;
+        for (var i = 0; i < _coloreds.Count; i++)
+        {
+            var isBadOne = _agroColoredsCount > i;
+            var randomSize = Random.Range(Settings.minSize, Settings.maxSize);
+
+            //Randomize position in screen bounds
+            _coloreds[i].transform.position = GetRandomPos(isBadOne);
+            _coloreds[i].transform.localScale = Vector3.one * randomSize;
+
+            //Reset Moving
+            _coloreds[i].StartMoving(Vector3.zero, 0);
+
+            //Color objects
+            _coloreds[i].sprite.color = isBadOne ? _currentColor : GetRandomColor();
+            _coloreds[i].sprite.sortingOrder = isBadOne ? 1 : 0;
+
+            //Activate ready go
+            _coloreds[i].gameObject.SetActive(true);
+        }
+    }
+    void SetMovingColoreds()
+    {
+        if(_currentLevel < Settings.MovingColoredLevel) return;
 
         var currentMoving = 0;
         do
         {
-            var randomGO = Random.Range(0, ColorGOs.Count);
+            var randomGO = Random.Range(0, _coloreds.Count);
 
-            var size = ColorGOs[randomGO].transform.localScale.x;
-            var randomSpeed = Random.Range(minSpeed, maxSpeed);
+            var size = _coloreds[randomGO].transform.localScale.x;
+            var randomSpeed = Random.Range(Settings.minSpeed, Settings.maxSpeed);
 
-            if (ColorGOs[randomGO].IsMoving()) continue;
+            if (_coloreds[randomGO].IsMoving()) continue;
 
             currentMoving++;
-            ColorGOs[randomGO].StartMoving( GetRandomPos(ColorGOs[randomGO].sprite.color == currentColor),
+            _coloreds[randomGO].StartMoving( GetRandomPos(_coloreds[randomGO].sprite.color == _currentColor),
                 randomSpeed * size );
 
-        } while (currentMoving < minimumMovingGOs);
-    }
-
-    public void SetTutorial()
-    {
-        if (currentLevel < tutorialLength)
-        {
-            helpText.color = currentColor;
-          
-            if(currentColor == Color.blue)
-                helpText.text = "Click on blue color";
-            else if(currentColor == Color.red)
-                helpText.text = "Click on red color";
-            else
-                helpText.text = "Click on green color";
-        }
-        else
-            helpText.text = "";
+        } while (currentMoving < _movingColoredsCount);
     }
 
     void FinishGame()
@@ -229,39 +199,22 @@ public class GameManager : MonoBehaviour
         _state = State.Ending;
 
         _endTime = Time.time;
-        DeathScreen.SetActive(true);
-        InGameUI.SetActive(false);
-        DeathText.text = "You failed to save him on " + currentLevel + " try";
+        
+        UI.OnGameFinished(_currentLevel);
+        UI.ActivateFlash(Color.white);
 
-        foreach (var colored in ColorGOs)
+        foreach (var colored in _coloreds)
         {
             colored.gameObject.SetActive(false);  
         }
-        Application.ExternalCall("kongregate.stats.submit", "Record", currentLevel);
-    }
 
-    public void ActivateBlindness()
-    {
-        blindColor.color = currentColor;
-        StopCoroutine("ReduceBlindness");
-        StartCoroutine(ReduceBlindness(blindColor));
-    }
-
-    IEnumerator ReduceBlindness(SpriteRenderer sprite)
-    {
-        var color = sprite.color;
-        while (color.a > 0)
-        {
-            color.a -= Time.deltaTime * reduceBlindSpeed;
-            sprite.color = color;
-            yield return null;
-        }
+        Application.ExternalCall("kongregate.stats.submit", "Record", _currentLevel);
     }
 
     Vector3 GetRandomPos(bool isBadOne)
     {
-        var screenPosX = Random.Range(spawnOffset.x, Screen.width - spawnOffset.y);
-        var screenPosY = Random.Range(spawnOffset.w, Screen.height - spawnOffset.z);
+        var screenPosX = Random.Range(Screen.width * Offset.Left, Screen.width * (0.5f - Offset.Right) + Screen.width / 2f);
+        var screenPosY = Random.Range(Screen.height * Offset.Down, Screen.height * (0.5f - Offset.Top) + Screen.height / 2f);
 
         var newPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPosX, screenPosY));
         newPos.z = isBadOne ? 0 : 1;
@@ -273,29 +226,46 @@ public class GameManager : MonoBehaviour
         do
         {
             color = colors[Random.Range(0, colors.Length)];
-        } while (color == currentColor);
+        } while (color == _currentColor);
 
         return color;
     }
+
     void AddNewGO()
     {
-        var go = Instantiate(ColorGoPrefab, Vector3.zero, Quaternion.identity, transform);
-        ColorGOs.Add(go.GetComponent<Colored>());
+        var go = Instantiate(ColoredPrefab, Vector3.zero, Quaternion.identity, transform);
+        _coloreds.Add(go.GetComponent<Colored>());
     }
 
     public void CheckForComplete()
     {
-        foreach (var go in ColorGOs)
+        foreach (var go in _coloreds)
         {
-            if(go.gameObject.activeInHierarchy && go.sprite.color == currentColor)
+            if(go.gameObject.activeInHierarchy && go.sprite.color == _currentColor)
                 return;
         }
 
         StartNewRound();
     }
 
-    public void PlayClickSound(bool correct)
+    public void IncreasePanic(float value)
     {
-        SFXPlayer.PlayOneShot(correct ? correctClickClip : wrongClickClip, correct ? correctClickVolume : wrongClickVolume);
+        _panic += value;
+    }
+
+    public bool IsAgroColored(Color coloredColor)
+    {
+        return coloredColor == _currentColor;
+    }
+
+    public void OnWrongColoredClick()
+    {
+        UI.ActivateFlash(_currentColor);
+        Audio.PlayWrongColoredClickClip();
+    }
+
+    public void OnCorrectColoredClick()
+    {
+        Audio.PlayCorrectColoredClickClip();
     }
 }

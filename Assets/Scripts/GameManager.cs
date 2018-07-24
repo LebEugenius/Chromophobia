@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("References")]
-    public Colored ColorGoPrefab;
+    public GameObject ColorGoPrefab;
     public Color[] colors;
     public GameObject Intro;
     public GameObject DeathScreen;
@@ -75,43 +75,57 @@ public class GameManager : MonoBehaviour
         switch (_state)
         {
             case State.Intro:
-                if (Input.anyKeyDown)
-                {
-                    Intro.SetActive(false);
-                    Face.gameObject.SetActive(true);
-                    for (var i = 0; i < startGOCount; i++)
-                        AddNewGO();
-
-                    currentLevel = 0;
-                    StartNewRound();
-                    _state = State.Game;
-                    InGameUI.SetActive(true);
-                }
+                    IntroUpdate();
                 break;
             case State.Game:
-                if(PanicLevel < MaxPanic)
-                    PanicLevel += Time.deltaTime;
-                else
-                    FinishGame();
-
-                for (var i = emotions.Length - 1; i >= 0; i--)
-                {
-                    if (PanicLevel / MaxPanic < panicLevels[i] / 100f) continue;
-                    Face.sprite = emotions[i];
-                    break;
-                }
+                    GameUpdate();
                 break;
             case State.Ending: 
-                if (Input.anyKeyDown && Time.time > _endTime + restartClickDelay)
-                {
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-                }
+                    FinishUpdate();
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
 
+    void IntroUpdate()
+    {
+        if (Input.anyKeyDown)
+        {
+            Intro.SetActive(false);
+            Face.gameObject.SetActive(true);
+            for (var i = 0; i < startGOCount; i++)
+                AddNewGO();
+
+            currentLevel = 0;
+            StartNewRound();
+            _state = State.Game;
+            InGameUI.SetActive(true);
+        }
+    }
+
+    void GameUpdate()
+    {
+        if(PanicLevel < MaxPanic && currentLevel > 5)
+            PanicLevel += Time.deltaTime;
+        else if(PanicLevel >= MaxPanic)
+            FinishGame();
+
+        for (var i = emotions.Length - 1; i >= 0; i--)
+        {
+            if (PanicLevel / MaxPanic < panicLevels[i] / 100f) continue;
+            Face.sprite = emotions[i];
+            break;
+        }
+    }
+
+    void FinishUpdate()
+    {
+        if (Input.anyKeyDown && Time.time > _endTime + restartClickDelay)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
     public void StartNewRound()
     {
         PanicLevel = 0;
@@ -246,7 +260,7 @@ public class GameManager : MonoBehaviour
     void AddNewGO()
     {
         var go = Instantiate(ColorGoPrefab, Vector3.zero, Quaternion.identity, transform);
-        ColorGOs.Add(go);
+        ColorGOs.Add(go.GetComponent<Colored>());
     }
 
     public void CheckForComplete()

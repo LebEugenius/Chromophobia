@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("X - Left, Y - Right, Z - Top, W - Bottom ")]
     public Vector4 spawnOffset;
 
+    public int tutorialLength = 5;
+
+
     private State _state = State.Intro;
     [System.NonSerialized] public int currentLevel;
     [System.NonSerialized] public Color currentColor;
@@ -103,10 +106,9 @@ public class GameManager : MonoBehaviour
             InGameUI.SetActive(true);
         }
     }
-
     void GameUpdate()
     {
-        if(PanicLevel < MaxPanic && currentLevel > 5)
+        if(PanicLevel < MaxPanic && currentLevel > tutorialLength)
             PanicLevel += Time.deltaTime;
         else if(PanicLevel >= MaxPanic)
             FinishGame();
@@ -118,7 +120,6 @@ public class GameManager : MonoBehaviour
             break;
         }
     }
-
     void FinishUpdate()
     {
         if (Input.anyKeyDown && Time.time > _endTime + restartClickDelay)
@@ -126,41 +127,26 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
+
     public void StartNewRound()
     {
         PanicLevel = 0;
         //Choose new color
         currentColor = GetRandomColor();
         Face.color = currentColor;
-        if (startGOCount <= 0)
-            startGOCount = 1;
-
-        if (minimumAggresiveColors <= 0)
-            minimumAggresiveColors = 1;
         
         currentLevel++;
-        if (currentLevel % 2 == 0)
-            AddNewGO();
-        if (currentLevel % 5 == 0)
-            minimumAggresiveColors++;
+
+        SetDifficulty();
 
         ActivateBlindness();
 
-        if (currentLevel < 5)
-        {
-            helpText.color = currentColor;
-          
-            if(currentColor == Color.blue)
-                helpText.text = "Click on blue color";
-            else if(currentColor == Color.red)
-                helpText.text = "Click on red color";
-            else
-                helpText.text = "Click on green color";
-        }
-        else
-            helpText.text = "";
+        SetColoreds();
+        SetMovingColoreds();
+    }
 
-        //Set up coloreds 
+    public void SetColoreds()
+    {
         for (var i = 0; i < ColorGOs.Count; i++)
         {
             var isBadOne = minimumAggresiveColors > i;
@@ -180,14 +166,29 @@ public class GameManager : MonoBehaviour
             //Activate ready go
             ColorGOs[i].gameObject.SetActive(true);
         }
+    }
+    public void SetDifficulty()
+    {
+        startGOCount = Mathf.Max(startGOCount, 1);
 
+        minimumAggresiveColors =  Mathf.Max(minimumAggresiveColors, 1);;
+
+        if (currentLevel % 2 == 0)
+            AddNewGO();
+
+        if (currentLevel % 5 == 0)
+            minimumAggresiveColors++;
+        
         if(currentLevel < startMovingLevel) return;
 
         if (currentLevel % 5 == 0 && currentLevel != startMovingLevel)
             minimumMovingGOs++;
 
-        if (minimumMovingGOs > ColorGOs.Count)
-            minimumMovingGOs = ColorGOs.Count;
+        minimumMovingGOs = Mathf.Min(minimumMovingGOs, ColorGOs.Count);
+    }
+    public void SetMovingColoreds()
+    {
+        if(currentLevel < startMovingLevel) return;
 
         var currentMoving = 0;
         do
@@ -198,10 +199,29 @@ public class GameManager : MonoBehaviour
             var randomSpeed = Random.Range(minSpeed, maxSpeed);
 
             if (ColorGOs[randomGO].IsMoving()) continue;
+
             currentMoving++;
-            ColorGOs[randomGO].StartMoving(GetRandomPos(ColorGOs[randomGO].sprite.color == currentColor),
-                randomSpeed * size);
+            ColorGOs[randomGO].StartMoving( GetRandomPos(ColorGOs[randomGO].sprite.color == currentColor),
+                randomSpeed * size );
+
         } while (currentMoving < minimumMovingGOs);
+    }
+
+    public void SetTutorial()
+    {
+        if (currentLevel < tutorialLength)
+        {
+            helpText.color = currentColor;
+          
+            if(currentColor == Color.blue)
+                helpText.text = "Click on blue color";
+            else if(currentColor == Color.red)
+                helpText.text = "Click on red color";
+            else
+                helpText.text = "Click on green color";
+        }
+        else
+            helpText.text = "";
     }
 
     void FinishGame()

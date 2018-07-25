@@ -5,13 +5,14 @@ using UnityEngine;
 public class Colored : MonoBehaviour
 {
     public SpriteRenderer sprite;
-    public float panicModifier;
 
     private Vector3 _originalPosition;
     private Vector3 _targetPosition = Vector3.zero;
 
     private bool _reverseDirection;
     private float _speed;
+
+    public OnColoredClick OnColoredClick;
 
     public void StartMoving(Vector3 targetPosition, float speed)
     {
@@ -44,18 +45,9 @@ public class Colored : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (GameManager.Instance.IsAgroColored(sprite.color))
-        {
-            GameManager.Instance.OnCorrectColoredClick();
-        }
-        else
-        {
-            GameManager.Instance.IncreasePanic(panicModifier);
-            GameManager.Instance.OnWrongColoredClick();
-        }
-
         _targetPosition = Vector3.zero;
         gameObject.SetActive(false);
-        GameManager.Instance.CheckForComplete();
+
+        OnColoredClick(sprite.color);
     }
 }

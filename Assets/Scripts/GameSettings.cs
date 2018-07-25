@@ -14,11 +14,13 @@ public class GameSettings : ScriptableObject
 
 
     [Header("Settings")]
-    public float minSpeed;
-    public float maxSpeed;
+    public float MinSpeed = 1;
+    public float MaxSpeed = 2;
 
-    public float minSize;
-    public float maxSize;
+    public float MinSize = 1;
+    public float MaxSize = 2;
+
+    public float PanicPenalty = 0.5f;
 
     [Header("Rates")]
     public int NewColoredsRate = 2;

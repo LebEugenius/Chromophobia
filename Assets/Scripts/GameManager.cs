@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 using Random = UnityEngine.Random;
+
+public delegate void OnColoredClick(Color coloredColor);
 
 public enum State { Intro, Game, Ending }
 public class GameManager : MonoBehaviour
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviour
     [Header("Managers")]
     public AudioManager Audio;
     public UIManager UI;
+    public Statistics Stats = new Statistics();
 
     [Header("References")]
     public GameObject ColoredPrefab;
@@ -24,8 +26,6 @@ public class GameManager : MonoBehaviour
 
     [Header("Ending")] 
     public float restartClickDelay = 1f;
-
-    
 
     private State _state = State.Intro;   
 
@@ -49,6 +49,8 @@ public class GameManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+
+        Stats.Load();
     }
     void Update()
     {
@@ -119,8 +121,9 @@ public class GameManager : MonoBehaviour
         _currentLevel++;
         _currentColor = GetRandomColor();
 
-        UI.ColorFace(_currentColor);
+        UI.ColorUI(_currentColor);
         UI.ActivateFlash(_currentColor);
+        UI.SetLevel(_currentLevel);
         UI.SetTutorial(_currentLevel < Settings.TutorialLength, _currentColor);
 
         IncreaseDifficulty();
@@ -156,7 +159,7 @@ public class GameManager : MonoBehaviour
         for (var i = 0; i < _coloreds.Count; i++)
         {
             var isBadOne = _agroColoredsCount > i;
-            var randomSize = Random.Range(Settings.minSize, Settings.maxSize);
+            var randomSize = Random.Range(Settings.MinSize, Settings.MaxSize);
 
             //Randomize position in screen bounds
             _coloreds[i].transform.position = GetRandomPos(isBadOne);
@@ -183,7 +186,7 @@ public class GameManager : MonoBehaviour
             var randomGO = Random.Range(0, _coloreds.Count);
 
             var size = _coloreds[randomGO].transform.localScale.x;
-            var randomSpeed = Random.Range(Settings.minSpeed, Settings.maxSpeed);
+            var randomSpeed = Random.Range(Settings.MinSpeed, Settings.MaxSpeed);
 
             if (_coloreds[randomGO].IsMoving()) continue;
 
@@ -208,7 +211,9 @@ public class GameManager : MonoBehaviour
             colored.gameObject.SetActive(false);  
         }
 
-        Application.ExternalCall("kongregate.stats.submit", "Record", _currentLevel);
+        Stats.RecordLevel = Mathf.Max(Stats.RecordLevel, _currentLevel);
+        Stats.Save();
+        Stats.UploadToServer();
     }
 
     Vector3 GetRandomPos(bool isBadOne)
@@ -234,7 +239,9 @@ public class GameManager : MonoBehaviour
     void AddNewGO()
     {
         var go = Instantiate(ColoredPrefab, Vector3.zero, Quaternion.identity, transform);
-        _coloreds.Add(go.GetComponent<Colored>());
+        var colored = go.GetComponent<Colored>();
+        colored.OnColoredClick = OnClick;
+        _coloreds.Add(colored);
     }
 
     public void CheckForComplete()
@@ -260,6 +267,7 @@ public class GameManager : MonoBehaviour
 
     public void OnWrongColoredClick()
     {
+        IncreasePanic(Settings.PanicPenalty);
         UI.ActivateFlash(_currentColor);
         Audio.PlayWrongColoredClickClip();
     }
@@ -267,5 +275,17 @@ public class GameManager : MonoBehaviour
     public void OnCorrectColoredClick()
     {
         Audio.PlayCorrectColoredClickClip();
+        Stats.AgroColoredsDestroyed++;
+    }
+
+    public void OnClick(Color coloredColor)
+    {
+        if (coloredColor == _currentColor)
+            OnCorrectColoredClick();
+        else
+            OnWrongColoredClick();
+
+        Stats.TotalColoredsDestroyed++;
+        CheckForComplete();
     }
 }

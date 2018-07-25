@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     [Header("Texts")]
     [SerializeField] private TMPro.TMP_Text DeathText;
     [SerializeField] private TMPro.TMP_Text HelpText;
+    [SerializeField] private TMPro.TMP_Text LevelText;
 
     [Header("Flash")]
     [SerializeField] private SpriteRenderer Flash;
@@ -50,17 +51,17 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ColorFace(Color color)
+    public void ColorUI(Color color)
     {
         Face.color = color;
+        HelpText.color = color;
+        LevelText.color = color;
     }
 
     public void SetTutorial(bool isTutorial, Color currentColor)
     {
         if (isTutorial)
         {
-            HelpText.color = currentColor;
-          
             if(currentColor == Color.blue)
                 HelpText.text = "Click on blue color";
             else if(currentColor == Color.red)
@@ -70,6 +71,11 @@ public class UIManager : MonoBehaviour
         }
         else
             HelpText.text = "";
+    }
+
+    public void SetLevel(int currentLevel)
+    {
+        LevelText.text = currentLevel.ToString();
     }
 
     public void ActivateFlash(Color color)

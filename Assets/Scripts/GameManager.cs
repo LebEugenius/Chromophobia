@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     private float _panic;
 
     private List<Colored> _coloreds = new List<Colored>();
+    private Camera mainCamera;
 
     void Awake()
     {
@@ -221,7 +222,10 @@ public class GameManager : MonoBehaviour
         var screenPosX = Random.Range(Screen.width * Offset.Left, Screen.width * (0.5f - Offset.Right) + Screen.width / 2f);
         var screenPosY = Random.Range(Screen.height * Offset.Down, Screen.height * (0.5f - Offset.Top) + Screen.height / 2f);
 
-        var newPos = Camera.main.ScreenToWorldPoint(new Vector3(screenPosX, screenPosY));
+        if(!mainCamera)
+            mainCamera = Camera.main;
+        
+        var newPos = mainCamera.ScreenToWorldPoint(new Vector3(screenPosX, screenPosY));
         newPos.z = isBadOne ? 0 : 1;
         return newPos;
     }
@@ -258,11 +262,6 @@ public class GameManager : MonoBehaviour
     public void IncreasePanic(float value)
     {
         _panic += value;
-    }
-
-    public bool IsAgroColored(Color coloredColor)
-    {
-        return coloredColor == _currentColor;
     }
 
     public void OnWrongColoredClick()

@@ -161,9 +161,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Hi, I'm Billy. And I'm afraid of colors but not all, they are always changing.
-    And it's strange, those colors that scared me began to calm me down. So please,
-    deal with the annoying colors and do not touch the good ones.
+  m_text: Hi, I'm Billy. Click anywhere to start!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: bd5dcb8afdb53a4499d430ddd2827a82, type: 2}
   m_sharedMaterial: {fileID: 21447520723985470, guid: bd5dcb8afdb53a4499d430ddd2827a82,
@@ -173,8 +171,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278255360
+  m_fontColor: {r: 0, g: 1, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_fontColorGradient:
     topLeft: {r: 1, g: 1, b: 1, a: 1}
@@ -209,7 +207,7 @@ MonoBehaviour:
   m_enableWordWrapping: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
-  m_firstOverflowCharacterIndex: 79
+  m_firstOverflowCharacterIndex: -1
   m_linkedTextComponent: {fileID: 0}
   m_isLinkedTextComponent: 0
   m_isTextTruncated: 0
@@ -232,12 +230,12 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 238012901}
-    characterCount: 220
+    characterCount: 39
     spriteCount: 0
-    spaceCount: 41
-    wordCount: 42
+    spaceCount: 6
+    wordCount: 7
     linkCount: 0
-    lineCount: 3
+    lineCount: 1
     pageCount: 1
     materialCount: 1
   m_havePropertiesChanged: 0
@@ -579,11 +577,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6c07000d9b00df242bb319f5c10ae10a, type: 3}
   - {fileID: 21300000, guid: f78ce83d330b28b49a24c2529ff63c39, type: 3}
   PanicLevels: 000000001e0000003c00000050000000
+  Dialogs:
+  - {fileID: 11400000, guid: c6ba7740ab038b84c9fa21835eaf4291, type: 2}
+  - {fileID: 11400000, guid: 491f32407e0e3954cae835a9ae055e7b, type: 2}
+  - {fileID: 11400000, guid: 476fd8bae2b8d6c4b92db1e70ed918a4, type: 2}
+  - {fileID: 11400000, guid: 4dbbd2c200b760045ba34eaea1f44cf2, type: 2}
+  - {fileID: 11400000, guid: 7f90e7a52c0fb1340acbdc8af8d40d3a, type: 2}
+  - {fileID: 11400000, guid: 0b7a860e42830164c8b1b8f14aa2799f, type: 2}
+  - {fileID: 11400000, guid: 31af62956bba11b428a41ab9084a02e2, type: 2}
   IntroScreen: {fileID: 1318075696}
   InGameScreen: {fileID: 1721558417}
   DeathScreen: {fileID: 1002635690}
   DeathText: {fileID: 2125081274}
-  HelpText: {fileID: 2081719314}
+  Dialog: {fileID: 2081719314}
   LevelText: {fileID: 2095602505}
   Flash: {fileID: 1720513326}
   FlashFadeSpeed: 2
@@ -820,7 +826,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -8.2373}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &671448186
@@ -844,14 +850,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: b93d9042be565fe48b99d49ee252918f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ce20d106eececa94d9b481b57a76d11c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1805,12 +1811,12 @@ MonoBehaviour:
   m_outlineColor:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 22
   m_fontStyle: 0
   m_textAlignment: 514
   m_isAlignmentEnumConverted: 1
@@ -1854,7 +1860,7 @@ MonoBehaviour:
     lineCount: 1
     pageCount: 1
     materialCount: 1
-  m_havePropertiesChanged: 0
+  m_havePropertiesChanged: 1
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_spriteAnimator: {fileID: 0}

@@ -6,6 +6,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Image Face;
     [SerializeField] private Sprite[] Emotions;
     [SerializeField] private int[] PanicLevels;
+    [SerializeField] private Dialog[] Dialogs;
 
     [Header("Screens")]
     [SerializeField] private GameObject IntroScreen;
@@ -14,7 +15,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Texts")]
     [SerializeField] private TMPro.TMP_Text DeathText;
-    [SerializeField] private TMPro.TMP_Text HelpText;
+    [SerializeField] private TMPro.TMP_Text Dialog;
     [SerializeField] private TMPro.TMP_Text LevelText;
 
     [Header("Flash")]
@@ -54,23 +55,29 @@ public class UIManager : MonoBehaviour
     public void ColorUI(Color color)
     {
         Face.color = color;
-        HelpText.color = color;
+        Dialog.color = color;
         LevelText.color = color;
     }
 
-    public void SetTutorial(bool isTutorial, Color currentColor)
+    public void ShowText(int currentLevel)
     {
-        if (isTutorial)
+        foreach (var t in Dialogs)
         {
-            if(currentColor == Color.blue)
-                HelpText.text = "Click on blue color";
-            else if(currentColor == Color.red)
-                HelpText.text = "Click on red color";
+            if (t.DialogLevel != currentLevel) continue;
+
+            string color;
+            if (Dialog.color == Color.red)
+                color = "red";
+            else if (Dialog.color == Color.green)
+                color = "green";
             else
-                HelpText.text = "Click on green color";
+                color = "blue";
+
+            Dialog.text = string.Format(t.DialogText, color);
+            return;
         }
-        else
-            HelpText.text = "";
+
+        Dialog.text = "";
     }
 
     public void SetLevel(int currentLevel)

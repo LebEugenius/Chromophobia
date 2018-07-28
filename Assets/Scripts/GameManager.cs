@@ -127,7 +127,7 @@ public class GameManager : MonoBehaviour
         UI.ColorUI(_currentColor);
         UI.ActivateFlash(_currentColor);
         UI.SetLevel(_currentLevel);
-        UI.SetTutorial(_currentLevel < Settings.TutorialLength, _currentColor);
+        UI.ShowText(_currentLevel);
         UI.SetEmotion(_panic / _panicCapacity);
 
         IncreaseDifficulty();

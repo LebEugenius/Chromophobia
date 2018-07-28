@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0574e1e2645a9be4eab48944c1c6591d, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
-  StartColoredsCount: 3
+  StartColoredsCount: 1
   StartAgroColoredsCount: 1
   StartMovingColoredsCount: 2
   StartDisguiseColoredsCount: 1
@@ -22,7 +22,7 @@ MonoBehaviour:
   MinSize: 1
   MaxSize: 2
   MinDisquiseTime: 0.5
-  MaxDisquiseTime: 2
+  MaxDisquiseTime: 1
   PanicPenalty: 0.5
   NewColoredsRate: 2
   AgroColoredsRate: 5

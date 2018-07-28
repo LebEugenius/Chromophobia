@@ -12,18 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0574e1e2645a9be4eab48944c1c6591d, type: 3}
   m_Name: Test
   m_EditorClassIdentifier: 
-  StartColoredsCount: 10000
+  StartColoredsCount: 3
   StartAgroColoredsCount: 1
   StartMovingColoredsCount: 2
-  StartPanicCapacity: 5
-  minSpeed: 1
-  maxSpeed: 2
-  minSize: 1
-  maxSize: 2
+  StartDisguiseColoredsCount: 1
+  StartPanicCapacity: 10000
+  MinSpeed: 1
+  MaxSpeed: 2
+  MinSize: 1
+  MaxSize: 2
+  MinDisquiseTime: 0.5
+  MaxDisquiseTime: 2
+  PanicPenalty: 0.5
   NewColoredsRate: 2
   AgroColoredsRate: 5
   MovingColoredsRate: 5
+  DisquiseColoredsRate: 5
   PanicCapacityBonusRate: 10
   PanicCapacityBonus: 0.1
   TutorialLength: 5
   MovingColoredLevel: 15
+  DisquiseColoredsLevel: 5

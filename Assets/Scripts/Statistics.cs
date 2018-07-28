@@ -26,7 +26,7 @@ public class Statistics
     public void UploadToServer()
     {
         Application.ExternalCall("kongregate.stats.submit", "Record", RecordLevel);
-        Application.ExternalCall("kongregate.stats.submit", "TotalColoreds", TotalColoredsDestroyed);
+        //Application.ExternalCall("kongregate.stats.submit", "TotalColoreds", TotalColoredsDestroyed);
         Application.ExternalCall("kongregate.stats.submit", "AgroColoreds", AgroColoredsDestroyed);
     }
 }

@@ -14,6 +14,9 @@ public class Colored : MonoBehaviour
 
     public OnColoredClick OnColoredClick;
 
+    public bool IsAgro { get; set; }
+
+    #region Moving
     public void StartMoving(Vector3 targetPosition, float speed)
     {
         _originalPosition = transform.position;
@@ -25,12 +28,7 @@ public class Colored : MonoBehaviour
     {
         return _targetPosition != Vector3.zero;
     }
-
-    void Update()
-    {
-        MoveBetweenTwoPoints();
-    }
-
+    
     void MoveBetweenTwoPoints()
     {
         if(_targetPosition == Vector3.zero) return;
@@ -43,11 +41,35 @@ public class Colored : MonoBehaviour
             _reverseDirection = !_reverseDirection;
     }
 
+    void Update()
+    {
+        MoveBetweenTwoPoints();
+    }
+    #endregion
+
+    #region MyRegion
+    public void StartDisquise(Color disquiseColor, float disquiseDuration)
+    {
+        StartCoroutine(Disquise(disquiseColor, disquiseDuration));
+    }
+
+    IEnumerator Disquise(Color disquiseColor, float disquiseDuration)
+    {
+        var oldColor = sprite.color;
+        sprite.color = disquiseColor;
+
+        yield return new WaitForSeconds(disquiseDuration);
+
+        StartCoroutine(Disquise(oldColor, disquiseDuration));
+    }
+    #endregion
+
     void OnMouseDown()
     {
         _targetPosition = Vector3.zero;
         gameObject.SetActive(false);
 
-        OnColoredClick(sprite.color);
+        StopAllCoroutines();
+        OnColoredClick(IsAgro);
     }
 }

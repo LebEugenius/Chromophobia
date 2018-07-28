@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
-public delegate void OnColoredClick(Color coloredColor);
+public delegate void OnColoredClick(bool isAgro);
 
 public enum State { Intro, Game, Ending }
 public class GameManager : MonoBehaviour
@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     private int _coloredsCount;
     private int _agroColoredsCount;
     private int _movingColoredsCount;
+    private int _disquiseColoredsCount;
 
     private float _panicCapacity;
     private float _panic;
@@ -85,7 +86,7 @@ public class GameManager : MonoBehaviour
     }
     void GameUpdate()
     {
-       if ( _currentLevel <= Settings.TutorialLength ) return;
+       if ( _currentLevel <= Settings.TutorialLength || _currentLevel == Settings.MovingColoredLevel || _currentLevel == Settings.DisquiseColoredsLevel) return;
         
         if (_panic < _panicCapacity )
            IncreasePanic(Time.deltaTime);
@@ -109,6 +110,7 @@ public class GameManager : MonoBehaviour
         _coloredsCount = Settings.StartColoredsCount;
         _agroColoredsCount = Settings.StartAgroColoredsCount;
         _movingColoredsCount = Settings.StartMovingColoredsCount;
+        _disquiseColoredsCount = Settings.StartDisguiseColoredsCount;
 
         _panicCapacity = Settings.StartPanicCapacity;
 
@@ -126,11 +128,13 @@ public class GameManager : MonoBehaviour
         UI.ActivateFlash(_currentColor);
         UI.SetLevel(_currentLevel);
         UI.SetTutorial(_currentLevel < Settings.TutorialLength, _currentColor);
+        UI.SetEmotion(_panic / _panicCapacity);
 
         IncreaseDifficulty();
 
         SetColoreds();
         SetMovingColoreds();
+        SetDisquiseColoreds();
     }
 
     void IncreaseDifficulty()
@@ -149,29 +153,37 @@ public class GameManager : MonoBehaviour
         
         if(_currentLevel < Settings.MovingColoredLevel) return;
 
-        if (_currentLevel % 5 == 0 && _currentLevel != Settings.MovingColoredLevel)
+        if (_currentLevel % Settings.MovingColoredsRate == 0 && _currentLevel != Settings.MovingColoredLevel)
             _movingColoredsCount++;
 
         _movingColoredsCount = Mathf.Min(_movingColoredsCount, _coloreds.Count);
+
+        if(_currentLevel < Settings.DisquiseColoredsLevel) return;
+
+        if (_currentLevel % Settings.DisquiseColoredsRate == 0 && _currentLevel != Settings.DisquiseColoredsLevel)
+            _disquiseColoredsCount++;
+
+        _disquiseColoredsCount = Mathf.Min(_disquiseColoredsCount, _agroColoredsCount);
     }
 
     void SetColoreds()
     {
         for (var i = 0; i < _coloreds.Count; i++)
         {
-            var isBadOne = _agroColoredsCount > i;
+            var isAgro = _agroColoredsCount > i;
             var randomSize = Random.Range(Settings.MinSize, Settings.MaxSize);
 
             //Randomize position in screen bounds
-            _coloreds[i].transform.position = GetRandomPos(isBadOne);
+            _coloreds[i].transform.position = GetRandomPos(isAgro);
             _coloreds[i].transform.localScale = Vector3.one * randomSize;
 
             //Reset Moving
             _coloreds[i].StartMoving(Vector3.zero, 0);
 
             //Color objects
-            _coloreds[i].sprite.color = isBadOne ? _currentColor : GetRandomColor();
-            _coloreds[i].sprite.sortingOrder = isBadOne ? 1 : 0;
+            _coloreds[i].sprite.color = isAgro ? _currentColor : GetRandomColor();
+            _coloreds[i].sprite.sortingOrder = isAgro ? 1 : 0;
+            _coloreds[i].IsAgro = isAgro;
 
             //Activate ready go
             _coloreds[i].gameObject.SetActive(true);
@@ -184,18 +196,27 @@ public class GameManager : MonoBehaviour
         var currentMoving = 0;
         do
         {
-            var randomGO = Random.Range(0, _coloreds.Count);
+            var randomColored = _coloreds[Random.Range(0, _coloreds.Count)];
 
-            var size = _coloreds[randomGO].transform.localScale.x;
+            if (randomColored.IsMoving()) continue;
+
+            var size = randomColored.transform.localScale.x;
             var randomSpeed = Random.Range(Settings.MinSpeed, Settings.MaxSpeed);
 
-            if (_coloreds[randomGO].IsMoving()) continue;
-
             currentMoving++;
-            _coloreds[randomGO].StartMoving( GetRandomPos(_coloreds[randomGO].sprite.color == _currentColor),
+            randomColored.StartMoving( GetRandomPos(randomColored.sprite.color == _currentColor),
                 randomSpeed * size );
 
         } while (currentMoving < _movingColoredsCount);
+    }
+    void SetDisquiseColoreds()
+    {
+        if(_currentLevel < Settings.DisquiseColoredsLevel || colors.Length <= 1) return;
+
+        for (var i = 0; i < _disquiseColoredsCount; i++)
+        {
+            _coloreds[i].StartDisquise(GetRandomColor(), Random.Range(Settings.MinDisquiseTime, Settings.MaxDisquiseTime));
+        }
     }
 
     void FinishGame()
@@ -250,9 +271,9 @@ public class GameManager : MonoBehaviour
 
     public void CheckForComplete()
     {
-        foreach (var go in _coloreds)
+        foreach (var colored in _coloreds)
         {
-            if(go.gameObject.activeInHierarchy && go.sprite.color == _currentColor)
+            if(colored.gameObject.activeInHierarchy && colored.IsAgro)
                 return;
         }
 
@@ -277,9 +298,9 @@ public class GameManager : MonoBehaviour
         Stats.AgroColoredsDestroyed++;
     }
 
-    public void OnClick(Color coloredColor)
+    public void OnClick(bool isAgro)
     {
-        if (coloredColor == _currentColor)
+        if (isAgro)
             OnCorrectColoredClick();
         else
             OnWrongColoredClick();

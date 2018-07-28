@@ -15,15 +15,21 @@ MonoBehaviour:
   StartColoredsCount: 3
   StartAgroColoredsCount: 1
   StartMovingColoredsCount: 2
+  StartDisguiseColoredsCount: 1
   StartPanicCapacity: 5
-  minSpeed: 1
-  maxSpeed: 2
-  minSize: 1
-  maxSize: 2
+  MinSpeed: 1
+  MaxSpeed: 2
+  MinSize: 1
+  MaxSize: 2
+  MinDisquiseTime: 0.5
+  MaxDisquiseTime: 2
+  PanicPenalty: 0.5
   NewColoredsRate: 2
   AgroColoredsRate: 5
   MovingColoredsRate: 5
+  DisquiseColoredsRate: 5
   PanicCapacityBonusRate: 10
-  PanicCapacityBonus: 0.1
+  PanicCapacityBonus: 0.2
   TutorialLength: 5
   MovingColoredLevel: 15
+  DisquiseColoredsLevel: 30

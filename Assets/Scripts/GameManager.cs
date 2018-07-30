@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("References")]
-    public Colored ColorGoPrefab;
+    public GameObject ColorGoPrefab;
     public Color[] colors;
     public GameObject Intro;
     public GameObject DeathScreen;
@@ -246,7 +246,8 @@ public class GameManager : MonoBehaviour
     void AddNewGO()
     {
         var go = Instantiate(ColorGoPrefab, Vector3.zero, Quaternion.identity, transform);
-        ColorGOs.Add(go);
+        var colored = go.GetComponent<Colored>();
+        ColorGOs.Add(colored);
     }
 
     public void CheckForComplete()

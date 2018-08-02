@@ -33,7 +33,7 @@ public class UIManager : MonoBehaviour
     {
         DeathScreen.SetActive(true);
         InGameScreen.SetActive(false);
-        DeathText.text = "You failed to save him on " + currentLevel + " try";
+        DeathText.text = string.Format(DeathText.text, currentLevel);
     }
 
     public void SetEmotion(float panicRatio)

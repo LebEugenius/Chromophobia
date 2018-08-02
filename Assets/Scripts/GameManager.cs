@@ -21,11 +21,7 @@ public class GameManager : MonoBehaviour
     public Statistics Stats = new Statistics();
 
     [Header("References")]
-<<<<<<< HEAD
-    public GameObject ColorGoPrefab;
-=======
     public GameObject ColoredPrefab;
->>>>>>> Version-1.2
     public Color[] colors;
 
     [Header("Ending")] 
@@ -267,16 +263,10 @@ public class GameManager : MonoBehaviour
 
     void AddNewGO()
     {
-<<<<<<< HEAD
-        var go = Instantiate(ColorGoPrefab, Vector3.zero, Quaternion.identity, transform);
-        var colored = go.GetComponent<Colored>();
-        ColorGOs.Add(colored);
-=======
         var go = Instantiate(ColoredPrefab, Vector3.zero, Quaternion.identity, transform);
         var colored = go.GetComponent<Colored>();
         colored.OnColoredClick = OnClick;
         _coloreds.Add(colored);
->>>>>>> Version-1.2
     }
 
     public void CheckForComplete()

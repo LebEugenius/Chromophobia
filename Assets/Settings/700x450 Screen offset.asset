@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e11c0552bd474684fb50e163b71166e4, type: 3}
+  m_Name: 700x450 Screen offset
+  m_EditorClassIdentifier: 
+  Top: 0.1
+  Right: 0.1
+  Down: 0.2
+  Left: 0.1

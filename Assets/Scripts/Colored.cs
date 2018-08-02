@@ -5,13 +5,18 @@ using UnityEngine;
 public class Colored : MonoBehaviour
 {
     public SpriteRenderer sprite;
-    public float panicModifier;
 
     private Vector3 _originalPosition;
     private Vector3 _targetPosition = Vector3.zero;
 
     private bool _reverseDirection;
     private float _speed;
+
+    public OnColoredClick OnColoredClick;
+
+    public bool IsAgro { get; set; }
+
+    #region Moving
     public void StartMoving(Vector3 targetPosition, float speed)
     {
         _originalPosition = transform.position;
@@ -23,7 +28,8 @@ public class Colored : MonoBehaviour
     {
         return _targetPosition != Vector3.zero;
     }
-    void Update()
+    
+    void MoveBetweenTwoPoints()
     {
         if(_targetPosition == Vector3.zero) return;
 
@@ -31,21 +37,39 @@ public class Colored : MonoBehaviour
 
         transform.position = Vector3.MoveTowards(transform.position, target, _speed * Time.deltaTime);
 
-        if ((target - transform.position).sqrMagnitude <= 0.1)
+        if ((target - transform.position).sqrMagnitude <= 0.1f)
             _reverseDirection = !_reverseDirection;
     }
+
+    void Update()
+    {
+        MoveBetweenTwoPoints();
+    }
+    #endregion
+
+    #region MyRegion
+    public void StartDisquise(Color disquiseColor, float disquiseDuration)
+    {
+        StartCoroutine(Disquise(disquiseColor, disquiseDuration));
+    }
+
+    IEnumerator Disquise(Color disquiseColor, float disquiseDuration)
+    {
+        var oldColor = sprite.color;
+        sprite.color = disquiseColor;
+
+        yield return new WaitForSeconds(disquiseDuration);
+
+        StartCoroutine(Disquise(oldColor, disquiseDuration));
+    }
+    #endregion
+
     void OnMouseDown()
     {
-        var isCorrectClick = sprite.color == GameManager.Instance.currentColor;
-        if (!isCorrectClick)
-        {
-            GameManager.Instance.PanicLevel += panicModifier;
-            GameManager.Instance.ActivateBlindness();
-        }
-
         _targetPosition = Vector3.zero;
         gameObject.SetActive(false);
-        GameManager.Instance.CheckForComplete();
-        GameManager.Instance.PlayClickSound(isCorrectClick);
+
+        StopAllCoroutines();
+        OnColoredClick(IsAgro);
     }
 }

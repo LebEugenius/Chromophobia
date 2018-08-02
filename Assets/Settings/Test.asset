@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0574e1e2645a9be4eab48944c1c6591d, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: 
+  StartColoredsCount: 3
+  StartAgroColoredsCount: 1
+  StartMovingColoredsCount: 2
+  StartDisguiseColoredsCount: 1
+  StartPanicCapacity: 10000
+  MinSpeed: 1
+  MaxSpeed: 2
+  MinSize: 1
+  MaxSize: 2
+  MinDisquiseTime: 0.5
+  MaxDisquiseTime: 2
+  PanicPenalty: 0.5
+  NewColoredsRate: 2
+  AgroColoredsRate: 5
+  MovingColoredsRate: 5
+  DisquiseColoredsRate: 5
+  PanicCapacityBonusRate: 10
+  PanicCapacityBonus: 0.1
+  TutorialLength: 5
+  MovingColoredLevel: 15
+  DisquiseColoredsLevel: 5

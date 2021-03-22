@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
@@ -15,6 +16,7 @@ public class GameManager : MonoBehaviour
     public GameSettings Settings;
     public SpawnOffset Offset;
 
+    public PostProcessVolume pp;
     [Header("Managers")]
     public AudioManager Audio;
     public UIManager UI;
@@ -93,6 +95,8 @@ public class GameManager : MonoBehaviour
         else
             FinishGame();
 
+
+        pp.sharedProfile.GetSetting<ChromaticAberration>().intensity.value = _panic / _panicCapacity;
         UI.SetEmotion(_panic / _panicCapacity);
     }
     void FinishUpdate()
@@ -130,6 +134,8 @@ public class GameManager : MonoBehaviour
         UI.ShowText(_currentLevel);
         UI.SetEmotion(_panic / _panicCapacity);
 
+        pp.sharedProfile.GetSetting<ChromaticAberration>().intensity.value = _panic;
+        
         IncreaseDifficulty();
 
         SetColoreds();
@@ -178,7 +184,7 @@ public class GameManager : MonoBehaviour
             _coloreds[i].transform.localScale = Vector3.one * randomSize;
 
             //Reset Moving
-            _coloreds[i].StartMoving(Vector3.zero, 0);
+            _coloreds[i].movement.StartMoving(Vector3.zero, 0);
 
             //Color objects
             _coloreds[i].sprite.color = isAgro ? _currentColor : GetRandomColor();
@@ -198,13 +204,13 @@ public class GameManager : MonoBehaviour
         {
             var randomColored = _coloreds[Random.Range(0, _coloreds.Count)];
 
-            if (randomColored.IsMoving()) continue;
+            if (randomColored.movement.IsMoving()) continue;
 
             var size = randomColored.transform.localScale.x;
             var randomSpeed = Random.Range(Settings.MinSpeed, Settings.MaxSpeed);
 
             currentMoving++;
-            randomColored.StartMoving( GetRandomPos(randomColored.sprite.color == _currentColor),
+            randomColored.movement.StartMoving( GetRandomPos(randomColored.sprite.color == _currentColor),
                 randomSpeed * size );
 
         } while (currentMoving < _movingColoredsCount);
@@ -215,7 +221,7 @@ public class GameManager : MonoBehaviour
 
         for (var i = 0; i < _disquiseColoredsCount; i++)
         {
-            _coloreds[i].StartDisquise(GetRandomColor(), Random.Range(Settings.MinDisquiseTime, Settings.MaxDisquiseTime));
+            _coloreds[i].disquise.StartDisquise(GetRandomColor(), Random.Range(Settings.MinDisquiseTime, Settings.MaxDisquiseTime));
         }
     }
 

@@ -2,73 +2,53 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class Disquise
+{
+    private readonly Colored _colored;
+    public Disquise(Colored colored)
+    {
+        _colored = colored;
+    }
+
+    public void StartDisquise(Color disquiseColor, float disquiseDuration)
+    {
+        _colored.StartCoroutine(ChangeDisquise(disquiseColor, disquiseDuration));
+    }
+
+    private IEnumerator ChangeDisquise(Color disquiseColor, float disquiseDuration)
+    {
+        var oldColor = _colored.sprite.color;
+        _colored.sprite.color = disquiseColor;
+
+        yield return new WaitForSeconds(disquiseDuration);
+
+        _colored.StartCoroutine(ChangeDisquise(oldColor, disquiseDuration));
+    }
+}
+
 public class Colored : MonoBehaviour
 {
     public SpriteRenderer sprite;
 
-    private Vector3 _originalPosition;
-    private Vector3 _targetPosition = Vector3.zero;
-
-    private bool _reverseDirection;
-    private float _speed;
-
+    public Movement movement;
+    public Disquise disquise;
+    
     public OnColoredClick OnColoredClick;
 
+    private Transform _transform;
+    private void Awake()
+    {
+        disquise = new Disquise(this);
+        _transform = transform;
+    }
+
     public bool IsAgro { get; set; }
-
-    #region Moving
-    public void StartMoving(Vector3 targetPosition, float speed)
-    {
-        _originalPosition = transform.position;
-        _targetPosition = targetPosition;
-        _speed = speed;
-    }
-
-    public bool IsMoving()
-    {
-        return _targetPosition != Vector3.zero;
-    }
     
-    void MoveBetweenTwoPoints()
-    {
-        if(_targetPosition == Vector3.zero) return;
-
-        var target = _reverseDirection ? _originalPosition : _targetPosition;
-
-        transform.position = Vector3.MoveTowards(transform.position, target, _speed * Time.deltaTime);
-
-        if ((target - transform.position).sqrMagnitude <= 0.1f)
-            _reverseDirection = !_reverseDirection;
-    }
-
-    void Update()
-    {
-        MoveBetweenTwoPoints();
-    }
-    #endregion
-
-    #region MyRegion
-    public void StartDisquise(Color disquiseColor, float disquiseDuration)
-    {
-        StartCoroutine(Disquise(disquiseColor, disquiseDuration));
-    }
-
-    IEnumerator Disquise(Color disquiseColor, float disquiseDuration)
-    {
-        var oldColor = sprite.color;
-        sprite.color = disquiseColor;
-
-        yield return new WaitForSeconds(disquiseDuration);
-
-        StartCoroutine(Disquise(oldColor, disquiseDuration));
-    }
-    #endregion
-
     void OnMouseDown()
     {
-        _targetPosition = Vector3.zero;
         gameObject.SetActive(false);
 
+        ParticlesManager.Instance.ActivateParticles(_transform.position, sprite.color);
         StopAllCoroutines();
         OnColoredClick(IsAgro);
     }

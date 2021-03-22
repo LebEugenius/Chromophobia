@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Introduction 1
   m_EditorClassIdentifier: 
   DialogLevel: 1
-  DialogText: I'm afraid of this {0} color! Please, deal with this colored by clicking
-    on it
+  DialogText: "I'm afraid of this {0} color! \nPlease, deal with this colored by
+    clicking on it"

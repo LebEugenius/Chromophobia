@@ -3,7 +3,14 @@ guid: c726258f5ea723741b7d7d90908556e7
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - Settings: {instanceID: 0}
+  - Offset: {instanceID: 0}
+  - pp: {instanceID: 0}
+  - Audio: {instanceID: 0}
+  - UI: {instanceID: 0}
+  - ColoredPrefab: {fileID: 1761713524930618, guid: 0f262f8842a7e4d43987cef7bee2827e,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
